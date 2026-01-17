@@ -1,6 +1,6 @@
 {
   "name": "JSE Helmi",
-  "content_in_root": true,
+  "content_in_root": false,
   "domains": ["jse_helmi"],
   "render_readme": false
 }
