@@ -51,12 +51,32 @@ class JSEConsumptionSensor(CoordinatorEntity[JSECoordinator], SensorEntity):
         return data.series[-1].value
 
     @property
+    def available(self) -> bool:
+        data: ConsumptionData = self.coordinator.data
+        if not data.series:
+            return False
+        last_ts = data.series[-1].timestamp
+        parsed = dt_util.parse_datetime(last_ts) if last_ts else None
+        if not parsed:
+            return False
+        age = dt_util.as_local(dt_util.now()) - dt_util.as_local(parsed)
+        return age <= timedelta(hours=self.coordinator.stale_hours)
+
+    @property
     def extra_state_attributes(self) -> Dict[str, Any]:
         data: ConsumptionData = self.coordinator.data
+        last_ts = data.series[-1].timestamp if data.series else None
+        last_dt = dt_util.parse_datetime(last_ts) if last_ts else None
+        stale_minutes = None
+        if last_dt:
+            age = dt_util.as_local(dt_util.now()) - dt_util.as_local(last_dt)
+            stale_minutes = int(age.total_seconds() // 60)
         return {
             "customer_id": data.customer_id,
             "metering_point_id": data.metering_point_id,
             "unit": data.unit,
+            "last_timestamp": last_ts,
+            "stale_minutes": stale_minutes,
             "series": [
                 {"ts": point.timestamp, "value": point.value}
                 for point in data.series

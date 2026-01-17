@@ -60,6 +60,7 @@ Alternative: use the built-in `JSE Helmi Consumption (Daily Total)` sensor, whic
 
 Update timing:
 - The integration refreshes at a configurable minute past the hour (default :10). Configure this in the integration options.
+- The hourly sensor is marked unavailable after a configurable number of hours without new data; see options.
 
 ## Notes
 - Times are reported in local timezone (Home Assistant locale).
@@ -85,3 +86,9 @@ This API may evolve. To keep the client/integration stable:
 - Prefer additive parsing (tolerate unknown fields) and avoid strict schema checks.
 - If consumption endpoints change, capture a new HAR, update endpoint map, then adjust client.
 - Consider adding a `--dry-run` mode to the CLI for quickly validating auth + endpoint reachability.
+
+## Integration Limitations
+- Hourly data can arrive late; the hourly sensor reflects the latest available full hour only.
+- Attributes include the full hourly series for debugging, but Energy ignores attributes and uses only sensor state.
+- The daily total sensor updates after the cutoff hour and increments a running total, so it is not a historical backfill.
+- If data stops updating, the hourly sensor is marked unavailable after the configured stale threshold.

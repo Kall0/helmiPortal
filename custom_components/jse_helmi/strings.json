@@ -34,7 +34,8 @@
           "customer_id": "Customer ID",
           "metering_point_id": "Metering point ID",
           "cutoff_hour": "Daily total cutoff hour (0-23)",
-          "update_minute": "Update minute past each hour (0-59)"
+          "update_minute": "Update minute past each hour (0-59)",
+          "stale_hours": "Mark unavailable after N hours without new data"
         }
       }
     }

@@ -16,7 +16,9 @@ from .const import (
     CONF_EMAIL,
     CONF_METERING_POINT_ID,
     CONF_PASSWORD,
+    CONF_STALE_HOURS,
     DEFAULT_CUTOFF_HOUR,
+    DEFAULT_STALE_HOURS,
     DOMAIN,
 )
 
@@ -48,6 +50,7 @@ class JSECoordinator(DataUpdateCoordinator[ConsumptionData]):
         self._customer_id = config[CONF_CUSTOMER_ID]
         self._metering_point_id = config[CONF_METERING_POINT_ID]
         self.cutoff_hour = int(config.get(CONF_CUTOFF_HOUR, DEFAULT_CUTOFF_HOUR))
+        self.stale_hours = int(config.get(CONF_STALE_HOURS, DEFAULT_STALE_HOURS))
         self._client = JSEApi(email=self._email, password=self._password)
         super().__init__(
             hass,
