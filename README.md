@@ -51,3 +51,9 @@ Energy dashboard setup:
 ## Notes
 - Times are reported in local timezone (Home Assistant locale).
 - Pricing endpoints are discovered but not exposed yet.
+
+## Tests
+Run the lightweight unit tests with:
+```bash
+python3 -m unittest discover -s tests
+```
