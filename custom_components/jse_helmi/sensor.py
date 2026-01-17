@@ -17,7 +17,7 @@ from .coordinator import ConsumptionData, JSECoordinator
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities
 ) -> None:
-    coordinator: JSECoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: JSECoordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
     async_add_entities(
         [
             JSEConsumptionSensor(coordinator),

@@ -4,8 +4,9 @@ from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.event import async_track_time_change
 
-from .const import DOMAIN, DEFAULT_UPDATE_INTERVAL_MINUTES
+from .const import DOMAIN, DEFAULT_UPDATE_INTERVAL_MINUTES, CONF_UPDATE_MINUTE, DEFAULT_UPDATE_MINUTE
 from .coordinator import JSECoordinator
 
 PLATFORMS = ["sensor"]
@@ -19,7 +20,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         update_interval=timedelta(minutes=DEFAULT_UPDATE_INTERVAL_MINUTES),
     )
     await coordinator.async_config_entry_first_refresh()
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    update_minute = int(config.get(CONF_UPDATE_MINUTE, DEFAULT_UPDATE_MINUTE))
+
+    def _schedule_refresh(*_args) -> None:
+        coordinator.async_request_refresh()
+
+    unsub = async_track_time_change(hass, _schedule_refresh, minute=update_minute, second=0)
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
+        "coordinator": coordinator,
+        "unsub": unsub,
+    }
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
@@ -28,5 +38,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
-        hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
+        data = hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
+        if data and data.get("unsub"):
+            data["unsub"]()
     return unload_ok

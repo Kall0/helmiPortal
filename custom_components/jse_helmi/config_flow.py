@@ -13,7 +13,9 @@ from .const import (
     CONF_EMAIL,
     CONF_METERING_POINT_ID,
     CONF_PASSWORD,
+    CONF_UPDATE_MINUTE,
     DEFAULT_CUTOFF_HOUR,
+    DEFAULT_UPDATE_MINUTE,
     DOMAIN,
 )
 
@@ -143,6 +145,12 @@ class JSEOptionsFlow(config_entries.OptionsFlow):
                         CONF_CUTOFF_HOUR,
                         default=self._entry.options.get(CONF_CUTOFF_HOUR, DEFAULT_CUTOFF_HOUR),
                     ): vol.All(vol.Coerce(int), vol.Range(min=0, max=23)),
+                    vol.Required(
+                        CONF_UPDATE_MINUTE,
+                        default=self._entry.options.get(
+                            CONF_UPDATE_MINUTE, DEFAULT_UPDATE_MINUTE
+                        ),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=59)),
                 }
             ),
         )

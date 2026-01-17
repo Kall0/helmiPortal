@@ -58,6 +58,9 @@ Energy dashboard setup:
   
 Alternative: use the built-in `JSE Helmi Consumption (Daily Total)` sensor, which updates after a configurable cutoff time (default 05:00 local) using the previous day’s hourly data.
 
+Update timing:
+- The integration refreshes at a configurable minute past the hour (default :10). Configure this in the integration options.
+
 ## Notes
 - Times are reported in local timezone (Home Assistant locale).
 - Pricing endpoints are discovered but not exposed yet.
