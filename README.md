@@ -57,3 +57,18 @@ Run the lightweight unit tests with:
 ```bash
 python3 -m unittest discover -s tests
 ```
+
+### Live integration tests
+These hit the real JSE endpoints and require credentials:
+```bash
+JSE_EMAIL="you@example.com" JSE_PASSWORD="your-password" \
+python3 -m unittest tests.test_integration_live
+```
+
+## Change Handling Strategy
+This API may evolve. To keep the client/integration stable:
+- Treat `notes/endpoints.md` as the source of truth; update it first when behavior changes.
+- Keep auth isolated in `client/jse_client.py` and `custom_components/jse_helmi/api.py`.
+- Prefer additive parsing (tolerate unknown fields) and avoid strict schema checks.
+- If consumption endpoints change, capture a new HAR, update endpoint map, then adjust client.
+- Consider adding a `--dry-run` mode to the CLI for quickly validating auth + endpoint reachability.
