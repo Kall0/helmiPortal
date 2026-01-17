@@ -146,6 +146,9 @@ def _parse_datetime(value: str) -> datetime:
         return datetime.combine(date.fromisoformat(text), time.min).replace(
             tzinfo=ZoneInfo("Europe/Helsinki")
         )
+    if text[-5:-4] in {"+", "-"} and text[-2:].isdigit() and text[-5:-2].isdigit():
+        # Convert +HHMM to +HH:MM for Python's fromisoformat.
+        text = f"{text[:-2]}:{text[-2:]}"
     if text.endswith("Z"):
         return datetime.fromisoformat(text.replace("Z", "+00:00"))
     return datetime.fromisoformat(text)
