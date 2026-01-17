@@ -30,7 +30,7 @@ async def async_setup_entry(
 
 class JSEConsumptionSensor(CoordinatorEntity[JSECoordinator], SensorEntity):
     _attr_name = "JSE Helmi Consumption (Hourly)"
-    _attr_unit_of_measurement = "kWh"
+    _attr_native_unit_of_measurement = "kWh"
     _attr_device_class = "energy"
     _attr_state_class = "measurement"
 
@@ -80,7 +80,11 @@ class JSEConsumptionSensor(CoordinatorEntity[JSECoordinator], SensorEntity):
             "last_timestamp": last_ts,
             "stale_minutes": stale_minutes,
             "series": [
-                {"ts": point.timestamp, "value": point.value, "status": point.status}
+                {
+                    "ts": point.timestamp,
+                    "value": point.value,
+                    "status": getattr(point, "status", None),
+                }
                 for point in data.series
             ],
         }
@@ -88,7 +92,7 @@ class JSEConsumptionSensor(CoordinatorEntity[JSECoordinator], SensorEntity):
 
 class JSEDailyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, SensorEntity):
     _attr_name = "JSE Helmi Consumption (Daily Total)"
-    _attr_unit_of_measurement = "kWh"
+    _attr_native_unit_of_measurement = "kWh"
     _attr_device_class = "energy"
     _attr_state_class = "total_increasing"
 
@@ -166,7 +170,7 @@ class JSEDailyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, Sens
 
 class JSEHourlyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, SensorEntity):
     _attr_name = "JSE Helmi Consumption (Hourly Total)"
-    _attr_unit_of_measurement = "kWh"
+    _attr_native_unit_of_measurement = "kWh"
     _attr_device_class = "energy"
     _attr_state_class = "total_increasing"
 
