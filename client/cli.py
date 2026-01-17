@@ -4,7 +4,10 @@ import argparse
 import json
 import os
 import sys
+from datetime import datetime, timedelta
 from typing import Any, Dict, List
+
+from zoneinfo import ZoneInfo
 
 from .jse_client import JSEClient, normalize_consumption_response
 
@@ -20,6 +23,10 @@ def _build_client() -> JSEClient:
     email = _require_env("JSE_EMAIL")
     password = _require_env("JSE_PASSWORD")
     return JSEClient(email=email, password=password)
+
+
+def _now_local() -> datetime:
+    return datetime.now(ZoneInfo("Europe/Helsinki"))
 
 
 def _cmd_login_test(client: JSEClient) -> Dict[str, Any]:
@@ -46,6 +53,12 @@ def _cmd_consumption(client: JSEClient, args: argparse.Namespace) -> Dict[str, A
     if not customer_ids:
         raise RuntimeError("No customer ids found")
     customer_id = args.customer_id or customer_ids[0]
+
+    if args.last_hours is not None:
+        end_dt = _now_local().replace(minute=0, second=0, microsecond=0)
+        start_dt = end_dt - timedelta(hours=args.last_hours)
+        args.start = start_dt.isoformat()
+        args.end = end_dt.isoformat()
 
     if args.metering_point_id:
         metering_point_id = args.metering_point_id
@@ -78,8 +91,13 @@ def main(argv: List[str]) -> int:
     subparsers.add_parser("customers", help="List customer and metering point ids")
 
     consumption = subparsers.add_parser("consumption", help="Fetch consumption data")
-    consumption.add_argument("--start", required=True, help="Start date or ISO8601 datetime")
-    consumption.add_argument("--end", required=True, help="End date or ISO8601 datetime")
+    consumption.add_argument("--start", help="Start date or ISO8601 datetime")
+    consumption.add_argument("--end", help="End date or ISO8601 datetime")
+    consumption.add_argument(
+        "--last-hours",
+        type=int,
+        help="Override start/end with a rolling window (e.g., 1 for last hour)",
+    )
     consumption.add_argument(
         "--granularity",
         required=True,
@@ -90,6 +108,10 @@ def main(argv: List[str]) -> int:
     consumption.add_argument("--metering-point-id", help="Override metering point id")
 
     args = parser.parse_args(argv)
+
+    if args.command == "consumption":
+        if args.last_hours is None and (not args.start or not args.end):
+            parser.error("consumption requires --start and --end unless --last-hours is set")
 
     try:
         client = _build_client()

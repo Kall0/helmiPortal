@@ -28,6 +28,12 @@ JSE_EMAIL="you@example.com" JSE_PASSWORD="your-password" python3 -m client.cli c
 
 For hourly data, use `--granularity hour` and a shorter range if needed.
 
+Last hour shortcut:
+```bash
+JSE_EMAIL="you@example.com" JSE_PASSWORD="your-password" \
+python3 -m client.cli consumption --granularity hour --last-hours 1
+```
+
 ## Home Assistant (HACS)
 
 This repo includes a custom integration under `custom_components/jse_helmi`.
