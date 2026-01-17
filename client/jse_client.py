@@ -203,6 +203,7 @@ def normalize_consumption_response(
                 {
                     "ts": _to_helsinki_iso(point.get("startTime")),
                     "value": point.get("value"),
+                    "status": point.get("status"),
                 }
             )
     return {"granularity": granularity, "unit": unit, "series": series}

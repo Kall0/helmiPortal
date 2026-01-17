@@ -75,6 +75,16 @@ def _cmd_consumption(client: JSEClient, args: argparse.Namespace) -> Dict[str, A
         end=args.end,
         resolution=args.granularity,
     )
+    if args.full_only:
+        data = raw.get("data", {})
+        series_list = data.get("productSeries") or []
+        if series_list:
+            filtered = [
+                point
+                for point in series_list[0].get("data") or []
+                if int(point.get("status", 0)) == 150
+            ]
+            series_list[0]["data"] = filtered
     normalized = normalize_consumption_response(raw, args.granularity)
     return {
         "customer_id": customer_id,
@@ -103,6 +113,11 @@ def main(argv: List[str]) -> int:
         required=True,
         choices=["hour", "day", "month"],
         help="Aggregation resolution",
+    )
+    consumption.add_argument(
+        "--full-only",
+        action="store_true",
+        help="Only include points with status=150 (full hour/day)",
     )
     consumption.add_argument("--customer-id", help="Override customer id")
     consumption.add_argument("--metering-point-id", help="Override metering point id")
