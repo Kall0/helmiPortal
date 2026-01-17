@@ -47,3 +47,4 @@
 - Filters: only accept points with `status == 150` (full hours/days).
 - Device is keyed to config entry id; all sensors attach to one device.
 - Integration uses sync `requests` (non-official style); async refactor was rolled back.
+- Do not change entity `unique_id` or device identifiers; doing so will reset HA history.
