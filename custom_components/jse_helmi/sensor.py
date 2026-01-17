@@ -21,9 +21,9 @@ async def async_setup_entry(
     coordinator: JSECoordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
     async_add_entities(
         [
-            JSEConsumptionSensor(coordinator),
-            JSEHourlyTotalSensor(coordinator),
-            JSEDailyTotalSensor(coordinator),
+            JSEConsumptionSensor(coordinator, entry),
+            JSEHourlyTotalSensor(coordinator, entry),
+            JSEDailyTotalSensor(coordinator, entry),
         ]
     )
 
@@ -33,15 +33,16 @@ class JSEConsumptionSensor(CoordinatorEntity[JSECoordinator], SensorEntity):
     _attr_native_unit_of_measurement = "kWh"
     _attr_state_class = "measurement"
 
-    def __init__(self, coordinator: JSECoordinator) -> None:
+    def __init__(self, coordinator: JSECoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator)
         self._attr_unique_id = (
             f"jse_helmi_consumption_hourly_{coordinator.data.metering_point_id}"
         )
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, coordinator.data.metering_point_id)},
-            name=f"JSE Helmi {coordinator.data.metering_point_id}",
+            identifiers={(DOMAIN, entry.entry_id)},
+            name=entry.title or "JSE Helmi",
             manufacturer="JSE",
+            model=coordinator.data.metering_point_id,
         )
 
     @property
@@ -95,15 +96,16 @@ class JSEDailyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, Sens
     _attr_device_class = "energy"
     _attr_state_class = "total_increasing"
 
-    def __init__(self, coordinator: JSECoordinator) -> None:
+    def __init__(self, coordinator: JSECoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator)
         self._attr_unique_id = (
             f"jse_helmi_consumption_daily_{coordinator.data.metering_point_id}"
         )
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, coordinator.data.metering_point_id)},
-            name=f"JSE Helmi {coordinator.data.metering_point_id}",
+            identifiers={(DOMAIN, entry.entry_id)},
+            name=entry.title or "JSE Helmi",
             manufacturer="JSE",
+            model=coordinator.data.metering_point_id,
         )
         self._total = 0.0
         self._last_day: Optional[date] = None
@@ -173,15 +175,16 @@ class JSEHourlyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, Sen
     _attr_device_class = "energy"
     _attr_state_class = "total_increasing"
 
-    def __init__(self, coordinator: JSECoordinator) -> None:
+    def __init__(self, coordinator: JSECoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator)
         self._attr_unique_id = (
             f"jse_helmi_consumption_hourly_total_{coordinator.data.metering_point_id}"
         )
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, coordinator.data.metering_point_id)},
-            name=f"JSE Helmi {coordinator.data.metering_point_id}",
+            identifiers={(DOMAIN, entry.entry_id)},
+            name=entry.title or "JSE Helmi",
             manufacturer="JSE",
+            model=coordinator.data.metering_point_id,
         )
         self._total = 0.0
         self._last_ts: Optional[str] = None
