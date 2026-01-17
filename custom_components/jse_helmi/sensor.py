@@ -150,7 +150,7 @@ class JSEDailyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, Sens
 
         target_day = (now_local - timedelta(days=1)).date()
         total = None
-        for point in data.daily_series:
+        for point in getattr(data, "daily_series", []):
             parsed = dt_util.parse_datetime(point.timestamp) if point.timestamp else None
             if not parsed:
                 continue
