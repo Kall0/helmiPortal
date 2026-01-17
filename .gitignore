@@ -1,0 +1,4 @@
+*.har
+__pycache__/
+*.pyc
+.env

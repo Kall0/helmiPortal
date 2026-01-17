@@ -1,0 +1,40 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to JSE Helmi",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      "customer": {
+        "title": "Select customer",
+        "data": {
+          "customer_id": "Customer ID"
+        }
+      },
+      "metering_point": {
+        "title": "Select metering point",
+        "data": {
+          "metering_point_id": "Metering point ID"
+        }
+      }
+    },
+    "error": {
+      "auth_failed": "Authentication failed.",
+      "no_customers": "No customers found for this account."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "JSE Helmi options",
+        "data": {
+          "customer_id": "Customer ID",
+          "metering_point_id": "Metering point ID"
+        }
+      }
+    }
+  }
+}

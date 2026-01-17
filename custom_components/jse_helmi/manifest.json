@@ -1,0 +1,10 @@
+{
+  "domain": "jse_helmi",
+  "name": "JSE Helmi",
+  "codeowners": [],
+  "config_flow": true,
+  "documentation": "https://github.com/your-org/helmiPortal",
+  "iot_class": "cloud_polling",
+  "requirements": ["requests>=2.31.0"],
+  "version": "0.1.0"
+}
