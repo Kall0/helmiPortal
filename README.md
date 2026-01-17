@@ -55,6 +55,8 @@ Energy dashboard setup:
       cycle: daily
   ```
 - Use `sensor.jse_energy_daily` in the Energy dashboard.
+  
+Alternative: use the built-in `JSE Helmi Consumption (Daily Total)` sensor, which updates after 05:00 local time using the previous day’s hourly data.
 
 ## Notes
 - Times are reported in local timezone (Home Assistant locale).

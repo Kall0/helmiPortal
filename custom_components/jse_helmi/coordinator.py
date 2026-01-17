@@ -77,7 +77,9 @@ class JSECoordinator(DataUpdateCoordinator[ConsumptionData]):
                 local_ts = local_dt.isoformat() if local_dt else ""
                 if not unit:
                     unit = point.get("type", "")
-                points.append(ConsumptionPoint(timestamp=local_ts, value=point.get("value")))
+                points.append(
+                    ConsumptionPoint(timestamp=local_ts, value=float(point.get("value", 0.0)))
+                )
         return ConsumptionData(
             customer_id=self._customer_id,
             metering_point_id=self._metering_point_id,
