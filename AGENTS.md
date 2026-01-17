@@ -10,6 +10,7 @@
 - Unit tests: `python3 -m unittest discover -s tests`
 - Live integration: `JSE_EMAIL=... JSE_PASSWORD=... python3 -m unittest tests.test_integration_live`
 - CLI smoke test: `JSE_EMAIL=... JSE_PASSWORD=... python3 -m client.cli login-test`
+ - CLI full-hour filter: `python3 -m client.cli consumption --granularity hour --last-hours 1 --full-only`
 
 ## Secrets
 - Use env vars only: `JSE_EMAIL`, `JSE_PASSWORD`.
@@ -29,7 +30,10 @@
 ## Deliverables
 - `notes/endpoints.md` kept current (method, path, params, headers, redacted schemas).
 - `client/jse_client.py` + `client/cli.py` for auth, customer lookup, consumption.
-- HA integration in `custom_components/jse_helmi` exposing hourly kWh; use utility meter for Energy.
+- HA integration in `custom_components/jse_helmi` exposing:
+  - Hourly sensor (`measurement`, no device_class)
+  - Hourly total sensor (`total_increasing` for Energy)
+  - Daily total sensor (`total_increasing`, uses `resolution=day`)
 
 ## Change Handling (when API changes)
 1. Capture a new HAR (auth + consumption view).
@@ -37,3 +41,9 @@
 3. Adjust `client/jse_client.py` and `custom_components/jse_helmi/api.py`.
 4. Run unit + live tests.
 5. Bump version in `custom_components/jse_helmi/manifest.json` and push.
+
+## HA Integration Notes
+- Options: cutoff hour, update minute, stale hours (set in integration options UI).
+- Filters: only accept points with `status == 150` (full hours/days).
+- Device is keyed to config entry id; all sensors attach to one device.
+- Integration uses sync `requests` (non-official style); async refactor was rolled back.

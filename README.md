@@ -58,7 +58,7 @@ Energy dashboard setup:
   
 Alternative: use the built-in total sensors:
 - `JSE Helmi Consumption (Daily Total)` updates after a configurable cutoff time (default 05:00 local) using the previous day’s daily data.
-- `JSE Helmi Consumption (Hourly Total)` accumulates full hourly values into a `total_increasing` sensor for Energy.
+- `JSE Helmi Consumption (Hourly Total)` accumulates full hourly values into a `total_increasing` sensor for Energy (seeds the latest full hour on first run).
 
 Update timing:
 - The integration refreshes at a configurable minute past the hour (default :10). Configure this in the integration options.
@@ -92,7 +92,8 @@ This API may evolve. To keep the client/integration stable:
 ## Integration Limitations
 - Hourly data can arrive late; the hourly sensor reflects the latest available full hour only.
 - Attributes include the full hourly series for debugging, but Energy ignores attributes and uses only sensor state.
-- The daily total sensor uses `resolution=day` and ignores entries where `status != 150`; it updates after the cutoff hour and increments a running total (not a historical backfill).
+- The hourly and daily series ignore entries where `status != 150`.
+- The daily total sensor uses `resolution=day`; it updates after the cutoff hour and increments a running total (not a historical backfill).
 - If data stops updating, the hourly sensor is marked unavailable after the configured stale threshold.
 - The daily total sensor now restores its last total on restart, but large gaps can still cause drift if data arrives late.
-- The hourly total sensor initializes at the latest available hour and does not backfill earlier usage.
+- The hourly total sensor seeds the latest available hour and does not backfill earlier usage.
