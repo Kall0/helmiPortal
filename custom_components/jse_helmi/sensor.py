@@ -31,7 +31,6 @@ async def async_setup_entry(
 class JSEConsumptionSensor(CoordinatorEntity[JSECoordinator], SensorEntity):
     _attr_name = "JSE Helmi Consumption (Hourly)"
     _attr_native_unit_of_measurement = "kWh"
-    _attr_device_class = "energy"
     _attr_state_class = "measurement"
 
     def __init__(self, coordinator: JSECoordinator) -> None:
@@ -218,8 +217,11 @@ class JSEHourlyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, Sen
 
         last_dt = dt_util.parse_datetime(self._last_ts) if self._last_ts else None
         if last_dt is None and points:
-            # Initialize to the latest point without backfilling historical data.
-            self._last_ts = points[-1][1].timestamp
+            # Initialize with the latest point (single hour) without backfilling history.
+            latest_point = points[-1][1]
+            if latest_point.value is not None:
+                self._total += float(latest_point.value)
+            self._last_ts = latest_point.timestamp
             self.async_write_ha_state()
             return
 
