@@ -22,6 +22,7 @@ async def async_setup_entry(
     async_add_entities(
         [
             JSEConsumptionSensor(coordinator),
+            JSEHourlyTotalSensor(coordinator),
             JSEDailyTotalSensor(coordinator),
         ]
     )
@@ -79,7 +80,7 @@ class JSEConsumptionSensor(CoordinatorEntity[JSECoordinator], SensorEntity):
             "last_timestamp": last_ts,
             "stale_minutes": stale_minutes,
             "series": [
-                {"ts": point.timestamp, "value": point.value}
+                {"ts": point.timestamp, "value": point.value, "status": point.status}
                 for point in data.series
             ],
         }
@@ -145,19 +146,85 @@ class JSEDailyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, Sens
             return
 
         target_day = (now_local - timedelta(days=1)).date()
-        total = 0.0
-        for point in data.series:
+        total = None
+        for point in data.daily_series:
             parsed = dt_util.parse_datetime(point.timestamp) if point.timestamp else None
             if not parsed:
                 continue
             local_dt = dt_util.as_local(parsed)
             if local_dt.date() == target_day:
-                if point.value is not None:
-                    total += float(point.value)
+                total = float(point.value)
+                break
 
-        if self._last_day != target_day:
+        if self._last_day != target_day and total is not None:
             # New day, increment the running total.
             self._total += total
             self._last_day = target_day
+
+        self.async_write_ha_state()
+
+
+class JSEHourlyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, SensorEntity):
+    _attr_name = "JSE Helmi Consumption (Hourly Total)"
+    _attr_unit_of_measurement = "kWh"
+    _attr_device_class = "energy"
+    _attr_state_class = "total_increasing"
+
+    def __init__(self, coordinator: JSECoordinator) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = (
+            f"jse_helmi_consumption_hourly_total_{coordinator.data.metering_point_id}"
+        )
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, coordinator.data.metering_point_id)},
+            name=f"JSE Helmi {coordinator.data.metering_point_id}",
+            manufacturer="JSE",
+        )
+        self._total = 0.0
+        self._last_ts: Optional[str] = None
+
+    @property
+    def native_value(self) -> Optional[float]:
+        return self._total
+
+    @property
+    def extra_state_attributes(self) -> Dict[str, Any]:
+        return {"last_timestamp": self._last_ts}
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        last_state = await self.async_get_last_state()
+        if not last_state or last_state.state in (None, "unknown", "unavailable"):
+            return
+        try:
+            self._total = float(last_state.state)
+        except (TypeError, ValueError):
+            return
+        self._last_ts = last_state.attributes.get("last_timestamp")
+
+    def _handle_coordinator_update(self) -> None:
+        data: ConsumptionData = self.coordinator.data
+        points = []
+        for point in data.series:
+            parsed = dt_util.parse_datetime(point.timestamp) if point.timestamp else None
+            if parsed:
+                points.append((parsed, point))
+
+        points.sort(key=lambda item: item[0])
+
+        last_dt = dt_util.parse_datetime(self._last_ts) if self._last_ts else None
+        if last_dt is None and points:
+            # Initialize to the latest point without backfilling historical data.
+            self._last_ts = points[-1][1].timestamp
+            self.async_write_ha_state()
+            return
+
+        for parsed, point in points:
+            if last_dt and parsed <= last_dt:
+                continue
+            if point.value is not None:
+                self._total += float(point.value)
+            self._last_ts = point.timestamp
+            last_dt = parsed
 
         self.async_write_ha_state()
