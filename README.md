@@ -1,5 +1,7 @@
 # Helmi Portal Client (JSE)
 
+Small vibe coding project to explore the JSE Helmi portal API and integrate it into Home Assistant.
+
 Reverse-engineered JSE Helmi portal API with a minimal Python client and a Home Assistant (HACS) integration. The HA integration exposes hourly kWh consumption and is designed to feed the Energy dashboard via a utility meter.
 
 ## Python CLI
