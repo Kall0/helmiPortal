@@ -90,5 +90,6 @@ This API may evolve. To keep the client/integration stable:
 ## Integration Limitations
 - Hourly data can arrive late; the hourly sensor reflects the latest available full hour only.
 - Attributes include the full hourly series for debugging, but Energy ignores attributes and uses only sensor state.
-- The daily total sensor updates after the cutoff hour and increments a running total, so it is not a historical backfill.
+- The daily total sensor updates after the cutoff hour and increments a running total; it is not a historical backfill.
 - If data stops updating, the hourly sensor is marked unavailable after the configured stale threshold.
+- The daily total sensor now restores its last total on restart, but large gaps can still cause drift if data arrives late.

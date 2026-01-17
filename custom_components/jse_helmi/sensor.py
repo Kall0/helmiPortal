@@ -7,6 +7,7 @@ from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
@@ -84,7 +85,7 @@ class JSEConsumptionSensor(CoordinatorEntity[JSECoordinator], SensorEntity):
         }
 
 
-class JSEDailyTotalSensor(CoordinatorEntity[JSECoordinator], SensorEntity):
+class JSEDailyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, SensorEntity):
     _attr_name = "JSE Helmi Consumption (Daily Total)"
     _attr_unit_of_measurement = "kWh"
     _attr_device_class = "energy"
@@ -114,6 +115,22 @@ class JSEDailyTotalSensor(CoordinatorEntity[JSECoordinator], SensorEntity):
         return {
             "last_day": self._last_day.isoformat() if self._last_day else None,
         }
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        last_state = await self.async_get_last_state()
+        if not last_state or last_state.state in (None, "unknown", "unavailable"):
+            return
+        try:
+            self._total = float(last_state.state)
+        except (TypeError, ValueError):
+            return
+        last_day = last_state.attributes.get("last_day")
+        if last_day:
+            try:
+                self._last_day = date.fromisoformat(last_day)
+            except ValueError:
+                self._last_day = None
 
     def _handle_coordinator_update(self) -> None:
         data: ConsumptionData = self.coordinator.data

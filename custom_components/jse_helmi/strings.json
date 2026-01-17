@@ -23,6 +23,8 @@
     },
     "error": {
       "auth_failed": "Authentication failed.",
+      "cannot_connect": "Cannot connect to the service.",
+      "unknown": "Unexpected error.",
       "no_customers": "No customers found for this account."
     }
   },

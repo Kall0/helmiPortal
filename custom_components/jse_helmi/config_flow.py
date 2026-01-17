@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import requests
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -39,8 +40,15 @@ class JSEConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._password = user_input[CONF_PASSWORD]
             try:
                 await self._async_discover()
+            except requests.HTTPError as exc:
+                if exc.response is not None and exc.response.status_code in (401, 403):
+                    errors["base"] = "auth_failed"
+                else:
+                    errors["base"] = "cannot_connect"
+            except requests.RequestException:
+                errors["base"] = "cannot_connect"
             except Exception:
-                errors["base"] = "auth_failed"
+                errors["base"] = "unknown"
             else:
                 if len(self._customer_ids) > 1:
                     return await self.async_step_customer()
