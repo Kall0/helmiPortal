@@ -54,7 +54,7 @@ class JSECoordinator(DataUpdateCoordinator[ConsumptionData]):
             raise UpdateFailed(str(exc)) from exc
 
     def _fetch_consumption(self) -> ConsumptionData:
-        end = dt_util.as_local(dt_util.now())
+        end = dt_util.as_local(dt_util.now()).replace(minute=0, second=0, microsecond=0)
         start = end - timedelta(days=2)
         raw = self._client.get_consumption(
             customer_id=self._customer_id,
@@ -71,7 +71,10 @@ class JSECoordinator(DataUpdateCoordinator[ConsumptionData]):
             for point in series_list[0].get("data") or []:
                 ts = point.get("startTime")
                 parsed = dt_util.parse_datetime(ts) if ts else None
-                local_ts = dt_util.as_local(parsed).isoformat() if parsed else ""
+                local_dt = dt_util.as_local(parsed) if parsed else None
+                if local_dt and local_dt >= end:
+                    continue
+                local_ts = local_dt.isoformat() if local_dt else ""
                 if not unit:
                     unit = point.get("type", "")
                 points.append(ConsumptionPoint(timestamp=local_ts, value=point.get("value")))
