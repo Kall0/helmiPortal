@@ -185,6 +185,7 @@ class JSEHourlyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, Sen
         )
         self._total = 0.0
         self._last_ts: Optional[str] = None
+        self._seed_ts: Optional[str] = None
 
     @property
     def native_value(self) -> Optional[float]:
@@ -192,7 +193,7 @@ class JSEHourlyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, Sen
 
     @property
     def extra_state_attributes(self) -> Dict[str, Any]:
-        return {"last_timestamp": self._last_ts}
+        return {"last_timestamp": self._last_ts, "seeded_ts": self._seed_ts}
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
@@ -204,6 +205,7 @@ class JSEHourlyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, Sen
         except (TypeError, ValueError):
             return
         self._last_ts = last_state.attributes.get("last_timestamp")
+        self._seed_ts = last_state.attributes.get("seeded_ts")
 
     def _handle_coordinator_update(self) -> None:
         data: ConsumptionData = self.coordinator.data
@@ -216,14 +218,27 @@ class JSEHourlyTotalSensor(CoordinatorEntity[JSECoordinator], RestoreEntity, Sen
         points.sort(key=lambda item: item[0])
 
         last_dt = dt_util.parse_datetime(self._last_ts) if self._last_ts else None
-        if last_dt is None and points:
-            # Initialize with the latest point (single hour) without backfilling history.
+        if points:
             latest_point = points[-1][1]
-            if latest_point.value is not None:
-                self._total += float(latest_point.value)
-            self._last_ts = latest_point.timestamp
-            self.async_write_ha_state()
-            return
+            if last_dt is None:
+                # Initialize with the latest point (single hour) without backfilling history.
+                if latest_point.value is not None:
+                    self._total += float(latest_point.value)
+                self._last_ts = latest_point.timestamp
+                self._seed_ts = latest_point.timestamp
+                self.async_write_ha_state()
+                return
+            if (
+                self._total == 0.0
+                and self._last_ts == latest_point.timestamp
+                and self._seed_ts != latest_point.timestamp
+            ):
+                # Seed once if we restored a zero total with a known last timestamp.
+                if latest_point.value is not None:
+                    self._total += float(latest_point.value)
+                self._seed_ts = latest_point.timestamp
+                self.async_write_ha_state()
+                return
 
         for parsed, point in points:
             if last_dt and parsed <= last_dt:
