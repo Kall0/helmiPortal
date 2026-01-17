@@ -98,7 +98,10 @@ class JSEDailyTotalSensor(CoordinatorEntity[JSECoordinator], SensorEntity):
     def _handle_coordinator_update(self) -> None:
         data: ConsumptionData = self.coordinator.data
         now_local = dt_util.as_local(dt_util.now())
-        cutoff = datetime.combine(now_local.date(), time(5, 0, 0, tzinfo=now_local.tzinfo))
+        cutoff = datetime.combine(
+            now_local.date(),
+            time(self.coordinator.cutoff_hour, 0, 0, tzinfo=now_local.tzinfo),
+        )
         if now_local < cutoff:
             # Before cutoff, keep the previous total.
             self.async_write_ha_state()

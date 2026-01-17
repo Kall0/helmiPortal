@@ -10,7 +10,15 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.util import dt as dt_util
 
 from .api import JSEApi
-from .const import CONF_CUSTOMER_ID, CONF_EMAIL, CONF_METERING_POINT_ID, CONF_PASSWORD, DOMAIN
+from .const import (
+    CONF_CUTOFF_HOUR,
+    CONF_CUSTOMER_ID,
+    CONF_EMAIL,
+    CONF_METERING_POINT_ID,
+    CONF_PASSWORD,
+    DEFAULT_CUTOFF_HOUR,
+    DOMAIN,
+)
 
 
 @dataclass
@@ -39,6 +47,7 @@ class JSECoordinator(DataUpdateCoordinator[ConsumptionData]):
         self._password = config[CONF_PASSWORD]
         self._customer_id = config[CONF_CUSTOMER_ID]
         self._metering_point_id = config[CONF_METERING_POINT_ID]
+        self.cutoff_hour = int(config.get(CONF_CUTOFF_HOUR, DEFAULT_CUTOFF_HOUR))
         self._client = JSEApi(email=self._email, password=self._password)
         super().__init__(
             hass,

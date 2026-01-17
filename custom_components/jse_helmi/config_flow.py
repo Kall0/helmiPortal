@@ -7,7 +7,15 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 
 from .api import JSEApi
-from .const import CONF_CUSTOMER_ID, CONF_EMAIL, CONF_METERING_POINT_ID, CONF_PASSWORD, DOMAIN
+from .const import (
+    CONF_CUTOFF_HOUR,
+    CONF_CUSTOMER_ID,
+    CONF_EMAIL,
+    CONF_METERING_POINT_ID,
+    CONF_PASSWORD,
+    DEFAULT_CUTOFF_HOUR,
+    DOMAIN,
+)
 
 
 class JSEConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -131,6 +139,10 @@ class JSEOptionsFlow(config_entries.OptionsFlow):
                         CONF_METERING_POINT_ID,
                         default=self._entry.data.get(CONF_METERING_POINT_ID),
                     ): str,
+                    vol.Required(
+                        CONF_CUTOFF_HOUR,
+                        default=self._entry.options.get(CONF_CUTOFF_HOUR, DEFAULT_CUTOFF_HOUR),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=23)),
                 }
             ),
         )

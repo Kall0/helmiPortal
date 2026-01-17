@@ -4,5 +4,7 @@ CONF_EMAIL = "email"
 CONF_PASSWORD = "password"
 CONF_CUSTOMER_ID = "customer_id"
 CONF_METERING_POINT_ID = "metering_point_id"
+CONF_CUTOFF_HOUR = "cutoff_hour"
 
 DEFAULT_UPDATE_INTERVAL_MINUTES = 60
+DEFAULT_CUTOFF_HOUR = 5

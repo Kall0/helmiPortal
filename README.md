@@ -56,7 +56,7 @@ Energy dashboard setup:
   ```
 - Use `sensor.jse_energy_daily` in the Energy dashboard.
   
-Alternative: use the built-in `JSE Helmi Consumption (Daily Total)` sensor, which updates after 05:00 local time using the previous day’s hourly data.
+Alternative: use the built-in `JSE Helmi Consumption (Daily Total)` sensor, which updates after a configurable cutoff time (default 05:00 local) using the previous day’s hourly data.
 
 ## Notes
 - Times are reported in local timezone (Home Assistant locale).

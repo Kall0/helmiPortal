@@ -32,7 +32,8 @@
         "title": "JSE Helmi options",
         "data": {
           "customer_id": "Customer ID",
-          "metering_point_id": "Metering point ID"
+          "metering_point_id": "Metering point ID",
+          "cutoff_hour": "Daily total cutoff hour (0-23)"
         }
       }
     }
