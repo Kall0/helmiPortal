@@ -25,6 +25,7 @@
       "auth_failed": "Authentication failed.",
       "cannot_connect": "Cannot connect to the service.",
       "unknown": "Unexpected error.",
+      "invalid_settings": "One or more values are out of range.",
       "no_customers": "No customers found for this account."
     }
   },
@@ -32,6 +33,7 @@
     "step": {
       "init": {
         "title": "JSE Helmi options",
+        "description": "Set the cutoff hour for daily totals, the refresh minute past each hour, and how long to wait before marking data stale.",
         "data": {
           "customer_id": "Customer ID",
           "metering_point_id": "Metering point ID",

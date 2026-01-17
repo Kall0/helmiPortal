@@ -137,8 +137,19 @@ class JSEOptionsFlow(config_entries.OptionsFlow):
         self._entry = entry
 
     async def async_step_init(self, user_input: dict | None = None) -> FlowResult:
+        errors: dict[str, str] = {}
         if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+            cutoff_hour = int(user_input[CONF_CUTOFF_HOUR])
+            update_minute = int(user_input[CONF_UPDATE_MINUTE])
+            stale_hours = int(user_input[CONF_STALE_HOURS])
+            if not (0 <= cutoff_hour <= 23):
+                errors["base"] = "invalid_settings"
+            elif not (0 <= update_minute <= 59):
+                errors["base"] = "invalid_settings"
+            elif not (1 <= stale_hours <= 24):
+                errors["base"] = "invalid_settings"
+            else:
+                return self.async_create_entry(title="", data=user_input)
 
         return self.async_show_form(
             step_id="init",
@@ -154,19 +165,20 @@ class JSEOptionsFlow(config_entries.OptionsFlow):
                     vol.Required(
                         CONF_CUTOFF_HOUR,
                         default=self._entry.options.get(CONF_CUTOFF_HOUR, DEFAULT_CUTOFF_HOUR),
-                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=23)),
+                    ): vol.Coerce(int),
                     vol.Required(
                         CONF_UPDATE_MINUTE,
                         default=self._entry.options.get(
                             CONF_UPDATE_MINUTE, DEFAULT_UPDATE_MINUTE
                         ),
-                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=59)),
+                    ): vol.Coerce(int),
                     vol.Required(
                         CONF_STALE_HOURS,
                         default=self._entry.options.get(
                             CONF_STALE_HOURS, DEFAULT_STALE_HOURS
                         ),
-                    ): vol.All(vol.Coerce(int), vol.Range(min=1, max=24)),
+                    ): vol.Coerce(int),
                 }
             ),
+            errors=errors,
         )

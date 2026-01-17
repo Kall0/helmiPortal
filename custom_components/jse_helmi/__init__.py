@@ -23,7 +23,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     update_minute = int(config.get(CONF_UPDATE_MINUTE, DEFAULT_UPDATE_MINUTE))
 
     def _schedule_refresh(*_args) -> None:
-        coordinator.async_request_refresh()
+        hass.async_create_task(coordinator.async_request_refresh())
 
     unsub = async_track_time_change(hass, _schedule_refresh, minute=update_minute, second=0)
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
