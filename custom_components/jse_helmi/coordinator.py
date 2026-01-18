@@ -63,6 +63,7 @@ class JSECoordinator(DataUpdateCoordinator[ConsumptionData]):
         try:
             return await self.hass.async_add_executor_job(self._fetch_consumption)
         except Exception as exc:  # noqa: BLE001 - coordinator wraps errors
+            logging.getLogger(__name__).exception("JSE Helmi update failed")
             raise UpdateFailed(str(exc)) from exc
 
     def _fetch_consumption(self) -> ConsumptionData:
