@@ -140,8 +140,8 @@ def _request_with_retry(
             response = session.request(
                 method, url, headers=headers, params=params, timeout=30
             )
-            if response.status_code == 401 and attempt == 0:
-                raise PermissionError("Unauthorized (401)")
+            if response.status_code in (401, 403):
+                raise PermissionError(f"Unauthorized ({response.status_code})")
             if response.status_code in (429, 500, 502, 503, 504):
                 raise RuntimeError(f"Retryable status {response.status_code}")
             response.raise_for_status()
